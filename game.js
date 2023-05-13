@@ -267,6 +267,8 @@ class Stairs extends AdventureScene {
 
                 });
                 // this.showMessage("Using the lantern, you can faintly see a dark figure standing inside, you close the door and open it. It is gone.");
+        } else if (this.hasItem("lit lantern")){
+            let door = createDoor(this, 0.01, 0.25, "It heads down to the basement.", 'Basement');
         } else {
              let door = createDoor(this, 0.01, 0.25, "It heads down to the basement. I shouldn't go in, it's too dark.", 'Basement');
         }
@@ -361,7 +363,101 @@ class Front extends AdventureScene {
 
         let window = createDesObj(this, 0.1, 0.5, "🪟 window", "Maybe there is something waiting outside.",
         "You look at the window.\nYou can see a small dirt road that leads to a busy highway.\nThe moon lights it from above.");
+        let flowers = createDesObj(this, 0.55, 0.5, "🥀🌹 flowers", "There are a collection of flowers here.",
+        "The flowers are all dark colors.\n They seem freshly cut.\n Someone must have been here recently.");
 
+        let frontDoor = this.add.text(this.w * 0.27, this.w * 0.52, "🚪🔒🚪 front door")
+        .setFontSize(this.s * 2)
+        .setInteractive()
+        .on('pointerover', () => {
+            this.showMessage("This leads outside");
+        })
+        .on('pointerdown', () => {
+                this.showMessage("It is locked with a code. You can’t escape yet until you unlock it correctly.");
+
+                // create combo lock
+
+                let dig1 = this.add.text(this.w * 0.3, this.w * 0.4, "-")
+                .setFontSize(this.s * 2)
+                let dig2 = this.add.text(this.w * 0.35, this.w * 0.4, "-")
+                .setFontSize(this.s * 2)
+                let dig3 = this.add.text(this.w * 0.4, this.w * 0.4, "-")
+                .setFontSize(this.s * 2)
+                
+
+                let combo = [dig1,dig2,dig3];
+
+                let index = 0;
+
+                combo[0].setText('['+combo[0].text + ']');
+
+                let tries = 3;
+
+                this.input.keyboard.on("keydown", (event) => {
+                    combo[index].setText(event.key);
+                    this.showMessage("Entered " + event.key);
+                    index++;
+                    if(index > 2){
+                        index = 0;
+                        tries--;
+                        this.showMessage("What was that noise?");
+                        this.showMessage("Is somewhere there?");
+                    }
+                    combo[index].setText('['+combo[index].text + ']');
+
+                    if(combo[0].text.replace(/\[|\]/g, "") == 3 
+                    && combo[1].text.replace(/\[|\]/g, "") == 1 
+                    && combo[2].text.replace(/\[|\]/g, "") == 5){
+                        this.showMessage("*click*");
+                        frontDoor.setText("🚪🔓🚪 unlocked");
+                        this.gotoScene('Escape');
+                    } else if(tries == 2){
+                        this.showMessage("What was that noise?");
+                    } else if (tries == 1) {
+                        this.showMessage("Is somewhere there?");
+                    } else if(tries == 0){
+                        this.showMessage("Someone is watching me.");
+                        this.gotoScene('WrongCode');
+                    }
+                });
+        });
+
+    }
+}
+
+class WrongCode extends Phaser.Scene {
+    constructor() {
+        super('WrongCode');
+    }
+    create() {
+        this.add.text(50, 50, "W̴r̶o̶n̷g̴ ̴c̶o̴d̸e̶").setFontSize(50);
+        this.add.text(500, 300, "As you fumbled with the lock too many times,\nyou hear footsteps from behind.\nYou hear heavy breathing behind your ear.\nIt found you.", {
+            fontSize: 35,
+            color: '#ff0000',
+            align: "left",
+            wordWrap: { width: 1100, useAdvancedWrap: true},
+            lineSpacing: 100,
+        });
+        this.add.text(50, 100, "Click anywhere to restart.").setFontSize(20);
+        this.input.on('pointerdown', () => this.scene.start('intro'));
+    }
+}
+
+class Escape extends Phaser.Scene {
+    constructor() {
+        super('Escape');
+    }
+    create() {
+        this.add.text(50, 50, "Escape!").setFontSize(50);
+        this.add.text(500, 300, "As you fumbled with the lock, \n It clicks open and the door unlocks. \n You open the door, but start hearing footsteps charging from behind. \n You slam the door. Running to the highway to escape.\nYou did it.", {
+            fontSize: 35,
+            color: '#00ff00',
+            align: "left",
+            wordWrap: { width: 1100, useAdvancedWrap: true},
+            lineSpacing: 100,
+        });
+        this.add.text(50, 100, "Click anywhere to restart.").setFontSize(20);
+        this.input.on('pointerdown', () => this.scene.start('intro'));
     }
 }
 
@@ -501,7 +597,7 @@ class Art extends AdventureScene {
             this.showMessage("You look at the painting.\nThere is a pirate ship, where the pirates are fighting ghosts.\nCool.");
         })
         .on('pointerdown', () => {
-            if (!this.hasItem("screwdriver") && moved[0] == false) {
+            if (this.hasItem("screwdriver") && moved[0] == false) {
                 this.showMessage("*squeak squeak*");
                 this.tweens.add({
                     targets: painting1,
@@ -509,7 +605,7 @@ class Art extends AdventureScene {
                     //alpha: { from: 1, to: 0 },
                     duration: 2000,
                     onComplete: () => {
-                        let number = this.add.text(this.w * 0.45, this.w * 0.05, "1").setColor("#ff0000")
+                        let number = this.add.text(this.w * 0.45, this.w * 0.05, "3").setColor("#ff0000")
                         .setFontSize(this.s * 3)
                         this.showMessage("You remove the painting from the wall");
                         moved[0] = true;
@@ -529,7 +625,7 @@ class Art extends AdventureScene {
             this.showMessage("The painting is of a small family, they are all wearing gas masks.");
         })
         .on('pointerdown', () => {
-            if (!this.hasItem("screwdriver") && moved[1] == false) {
+            if (this.hasItem("screwdriver") && moved[1] == false) {
                 this.showMessage("*squeak squeak*");
                 this.tweens.add({
                     targets: painting2,
@@ -557,7 +653,7 @@ class Art extends AdventureScene {
             this.showMessage("The paint depicts a city skyline. The sky is red. There are dark figures standing on the streets.");
         })
         .on('pointerdown', () => {
-            if (!this.hasItem("screwdriver") && moved[2] == false) {
+            if (this.hasItem("screwdriver") && moved[2] == false) {
                 this.showMessage("*squeak squeak*");
                 this.tweens.add({
                     targets: painting3,
@@ -587,11 +683,11 @@ class Intro extends Phaser.Scene {
         super('intro')
     }
     create() {
-        this.add.text(50,50, "Adventure awaits!").setFontSize(50);
-        this.add.text(50,100, "Click anywhere to begin.").setFontSize(20);
+        this.add.text(50,50, "How will your story end? By Phil Meyer").setFontSize(50);
+        this.add.text(50,100, "Click anywhere to wake up.").setFontSize(20);
         this.input.on('pointerdown', () => {
             this.cameras.main.fade(1000, 0,0,0);
-            this.time.delayedCall(1000, () => this.scene.start('Stairs'));
+            this.time.delayedCall(1000, () => this.scene.start('StartingRoom'));
         });
     }
 }
@@ -618,7 +714,7 @@ const game = new Phaser.Game({
     scene: [Intro, Demo1, Demo2, Outro,
             StartingRoom, DarkHall, NoLight,
             Stairs, Basement, Front, Dining, 
-            Kitchen, Art, Sick, NoLantern],
+            Kitchen, Art, Sick, NoLantern, WrongCode, Escape],
     title: "Adventure Game",
 });
 
